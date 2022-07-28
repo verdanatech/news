@@ -1,25 +1,32 @@
 <?php
-/*
+
+/**
+ * -------------------------------------------------------------------------
+ * News plugin for GLPI
+ * -------------------------------------------------------------------------
  *
- -------------------------------------------------------------------------
- Plugin GLPI News
- Copyright (C) 2015 by teclib.
- http://www.teclib.com
- -------------------------------------------------------------------------
- LICENSE
- This file is part of Plugin GLPI News.
- Plugin GLPI News is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- Plugin GLPI News is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with Plugin GLPI News. If not, see <http://www.gnu.org/licenses/>.
- --------------------------------------------------------------------------
-*/
+ * LICENSE
+ *
+ * This file is part of News.
+ *
+ * News is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * News is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with News. If not, see <http://www.gnu.org/licenses/>.
+ * -------------------------------------------------------------------------
+ * @copyright Copyright (C) 2015-2022 by News plugin team.
+ * @license   GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/pluginsGLPI/news
+ * -------------------------------------------------------------------------
+ */
 
 function plugin_news_install() {
    global $DB;
@@ -67,6 +74,7 @@ function plugin_news_install() {
          `plugin_news_alerts_id` INT NOT NULL,
          `itemtype`              VARCHAR(255) NOT NULL,
          `items_id`              INT NOT NULL,
+         `all_items`             TINYINT(1) NOT NULL DEFAULT 0,
          PRIMARY KEY (`id`),
          UNIQUE KEY `alert_itemtype_items_id`
             (`plugin_news_alerts_id`, `itemtype`,`items_id`)
@@ -140,6 +148,18 @@ function plugin_news_install() {
       $migration->dropField("glpi_plugin_news_alerts", "profiles_id");
    }
 
+   // Replace -1 value usage in items_id foreign key
+   if (!$DB->fieldExists("glpi_plugin_news_alerts_targets", "all_items")) {
+      $migration->addField("glpi_plugin_news_alerts_targets", "all_items", 'bool');
+      $migration->addPostQuery(
+          $DB->buildUpdate(
+              'glpi_plugin_news_alerts_targets',
+              ['items_id' => '0', 'all_items' => '1'],
+              ['items_id' => '-1']
+          )
+      );
+   }
+
    // install default display preferences
    $dpreferences = new DisplayPreference;
    $found_dpref = $dpreferences->find(['itemtype' => ['LIKE', '%PluginNews%']]);
@@ -157,7 +177,7 @@ function plugin_news_install() {
       $migration->addField("glpi_plugin_news_alerts", "is_displayed_oncentral", 'bool', ['value' => true]);
    }
 
-   $migration->migrationOneTable("glpi_plugin_news_alerts");
+   $migration->executeMigration();
    return true;
 }
 

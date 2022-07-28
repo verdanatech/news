@@ -1,24 +1,23 @@
-<?php return array (
-  'root' => 
-  array (
-    'pretty_version' => '1.9.0',
-    'version' => '1.9.0.0',
-    'aliases' => 
-    array (
+<?php return array(
+    'root' => array(
+        'pretty_version' => '1.9.1',
+        'version' => '1.9.1.0',
+        'type' => 'library',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'reference' => '01cbc56d9c6034652a19dfead1ce0ae3c98e0f05',
+        'name' => '__root__',
+        'dev' => false,
     ),
-    'reference' => '883bb6020fdc28c96153a0801a17735ed3838ef3',
-    'name' => '__root__',
-  ),
-  'versions' => 
-  array (
-    '__root__' => 
-    array (
-      'pretty_version' => '1.9.0',
-      'version' => '1.9.0.0',
-      'aliases' => 
-      array (
-      ),
-      'reference' => '883bb6020fdc28c96153a0801a17735ed3838ef3',
+    'versions' => array(
+        '__root__' => array(
+            'pretty_version' => '1.9.1',
+            'version' => '1.9.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'reference' => '01cbc56d9c6034652a19dfead1ce0ae3c98e0f05',
+            'dev_requirement' => false,
+        ),
     ),
-  ),
 );
