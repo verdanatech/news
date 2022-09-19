@@ -1,32 +1,39 @@
 <?php
-/*
- *
- -------------------------------------------------------------------------
- Plugin GLPI News
- Copyright (C) 2015 by teclib.
- http://www.teclib.com
- -------------------------------------------------------------------------
- LICENSE
- This file is part of Plugin GLPI News.
- Plugin GLPI News is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- Plugin GLPI News is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with Plugin GLPI News. If not, see <http://www.gnu.org/licenses/>.
- --------------------------------------------------------------------------
-*/
 
-define ('PLUGIN_NEWS_VERSION', '1.9.0');
+/**
+ * -------------------------------------------------------------------------
+ * News plugin for GLPI
+ * -------------------------------------------------------------------------
+ *
+ * LICENSE
+ *
+ * This file is part of News.
+ *
+ * News is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * News is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with News. If not, see <http://www.gnu.org/licenses/>.
+ * -------------------------------------------------------------------------
+ * @copyright Copyright (C) 2015-2022 by News plugin team.
+ * @license   GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/pluginsGLPI/news
+ * -------------------------------------------------------------------------
+ */
+
+define ('PLUGIN_NEWS_VERSION', '1.10.5');
 
 // Minimal GLPI version, inclusive
-define("PLUGIN_NEWS_MIN_GLPI", "9.5");
+define("PLUGIN_NEWS_MIN_GLPI", "10.0.0");
 // Maximum GLPI version, exclusive
-define("PLUGIN_NEWS_MAX_GLPI", "9.6");
+define("PLUGIN_NEWS_MAX_GLPI", "10.0.99");
 
 function plugin_init_news() {
    global $PLUGIN_HOOKS, $CFG_GLPI;

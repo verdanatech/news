@@ -1,25 +1,32 @@
 <?php
-/*
+
+/**
+ * -------------------------------------------------------------------------
+ * News plugin for GLPI
+ * -------------------------------------------------------------------------
  *
- -------------------------------------------------------------------------
- Plugin GLPI News
- Copyright (C) 2015 by teclib.
- http://www.teclib.com
- -------------------------------------------------------------------------
- LICENSE
- This file is part of Plugin GLPI News.
- Plugin GLPI News is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- Plugin GLPI News is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with Plugin GLPI News. If not, see <http://www.gnu.org/licenses/>.
- --------------------------------------------------------------------------
-*/
+ * LICENSE
+ *
+ * This file is part of News.
+ *
+ * News is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * News is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with News. If not, see <http://www.gnu.org/licenses/>.
+ * -------------------------------------------------------------------------
+ * @copyright Copyright (C) 2015-2022 by News plugin team.
+ * @license   GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/pluginsGLPI/news
+ * -------------------------------------------------------------------------
+ */
 
 use Glpi\Event;
 
@@ -46,7 +53,7 @@ if (isset($_POST['update'])) {
                  sprintf(__('%1$s adds the item %2$s'), $_SESSION["glpiname"], $_POST["name"]));
 
       if ($_SESSION['glpibackcreated']) {
-         Html::redirect($alert->getFormURL()."?id=".$newID);
+         Html::redirect($alert->getLinkURL());
       }
    }
    Html::back();
@@ -76,8 +83,8 @@ if (isset($_POST['update'])) {
    $alert->redirectToList();
 
 } else if (isset($_POST["addvisibility"])) {
-   $alert->check($_POST['plugin_news_alerts_id'], UPDATE);
    $target = new PluginNewsAlert_Target();
+   $target->check(-1, CREATE, $_POST);
    $target->add($_POST);
    Html::back();
 }

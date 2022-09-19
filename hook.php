@@ -1,76 +1,88 @@
 <?php
-/*
+
+/**
+ * -------------------------------------------------------------------------
+ * News plugin for GLPI
+ * -------------------------------------------------------------------------
  *
- -------------------------------------------------------------------------
- Plugin GLPI News
- Copyright (C) 2015 by teclib.
- http://www.teclib.com
- -------------------------------------------------------------------------
- LICENSE
- This file is part of Plugin GLPI News.
- Plugin GLPI News is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- Plugin GLPI News is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with Plugin GLPI News. If not, see <http://www.gnu.org/licenses/>.
- --------------------------------------------------------------------------
-*/
+ * LICENSE
+ *
+ * This file is part of News.
+ *
+ * News is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * News is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with News. If not, see <http://www.gnu.org/licenses/>.
+ * -------------------------------------------------------------------------
+ * @copyright Copyright (C) 2015-2022 by News plugin team.
+ * @license   GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/pluginsGLPI/news
+ * -------------------------------------------------------------------------
+ */
 
 function plugin_news_install() {
    global $DB;
 
    $migration = new Migration(Plugin::getInfo('news', 'version'));
 
+   $default_charset = DBConnection::getDefaultCharset();
+   $default_collation = DBConnection::getDefaultCollation();
+   $default_key_sign = DBConnection::getDefaultPrimaryKeySignOption();
+
    if (! $DB->tableExists('glpi_plugin_news_alerts')) {
       $DB->query("
          CREATE TABLE IF NOT EXISTS `glpi_plugin_news_alerts` (
-         `id`                       INT NOT NULL AUTO_INCREMENT,
+         `id`                       INT {$default_key_sign} NOT NULL AUTO_INCREMENT,
          `date_mod`                 TIMESTAMP NOT NULL,
          `name`                     VARCHAR(255) NOT NULL,
          `message`                  TEXT NOT NULL,
          `date_start`               TIMESTAMP NULL DEFAULT NULL,
          `date_end`                 TIMESTAMP NULL DEFAULT NULL,
          `type`                     INT NOT NULL,
-         `is_deleted`               TINYINT(1) NOT NULL DEFAULT 0,
-         `is_displayed_onlogin`     TINYINT(1) NOT NULL,
-         `is_displayed_oncentral`   TINYINT(1) NOT NULL,
-         `entities_id`              INT NOT NULL,
-         `is_recursive`             TINYINT(1) NOT NULL DEFAULT 1,
+         `is_deleted`               TINYINT NOT NULL DEFAULT 0,
+         `is_displayed_onlogin`     TINYINT NOT NULL,
+         `is_displayed_oncentral`   TINYINT NOT NULL,
+         `entities_id`              INT {$default_key_sign} NOT NULL,
+         `is_recursive`             TINYINT NOT NULL DEFAULT 1,
          PRIMARY KEY (`id`)
-         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;
       ");
    }
 
    if (! $DB->tableExists('glpi_plugin_news_alerts_users')) {
       $DB->query("
          CREATE TABLE IF NOT EXISTS `glpi_plugin_news_alerts_users` (
-         `id`                    INT NOT NULL AUTO_INCREMENT,
-         `plugin_news_alerts_id` INT NOT NULL,
-         `users_id`              INT NOT NULL,
-         `state`                 TINYINT(1) NOT NULL,
+         `id`                    INT {$default_key_sign} NOT NULL AUTO_INCREMENT,
+         `plugin_news_alerts_id` INT {$default_key_sign} NOT NULL,
+         `users_id`              INT {$default_key_sign} NOT NULL,
+         `state`                 TINYINT NOT NULL,
          PRIMARY KEY (`id`),
          UNIQUE KEY `state_for_user`
             (`plugin_news_alerts_id`,`users_id`,`state`)
-         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;
       ");
    }
 
    if (! $DB->tableExists('glpi_plugin_news_alerts_targets')) {
       $DB->query("
          CREATE TABLE IF NOT EXISTS `glpi_plugin_news_alerts_targets` (
-         `id`                    INT NOT NULL AUTO_INCREMENT,
-         `plugin_news_alerts_id` INT NOT NULL,
+         `id`                    INT {$default_key_sign} NOT NULL AUTO_INCREMENT,
+         `plugin_news_alerts_id` INT {$default_key_sign} NOT NULL,
          `itemtype`              VARCHAR(255) NOT NULL,
-         `items_id`              INT NOT NULL,
+         `items_id`              INT {$default_key_sign} NOT NULL,
+         `all_items`             TINYINT NOT NULL DEFAULT 0,
          PRIMARY KEY (`id`),
          UNIQUE KEY `alert_itemtype_items_id`
             (`plugin_news_alerts_id`, `itemtype`,`items_id`)
-         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+         ) ENGINE=InnoDB DEFAULT CHARSET={$default_charset} COLLATE={$default_collation} ROW_FORMAT=DYNAMIC;
       ");
    }
 
@@ -117,7 +129,7 @@ function plugin_news_install() {
    if ($alert_fields['is_deleted']['Default'] !== '0') {
       $migration->changeField("glpi_plugin_news_alerts",
                            "is_deleted", "is_deleted",
-                           "TINYINT(1) NOT NULL DEFAULT 0");
+                           "TINYINT NOT NULL DEFAULT 0");
    }
 
    // end/start dates can be null
@@ -140,6 +152,18 @@ function plugin_news_install() {
       $migration->dropField("glpi_plugin_news_alerts", "profiles_id");
    }
 
+   // Replace -1 value usage in items_id foreign key
+   if (!$DB->fieldExists("glpi_plugin_news_alerts_targets", "all_items")) {
+      $migration->addField("glpi_plugin_news_alerts_targets", "all_items", 'bool');
+      $migration->addPostQuery(
+          $DB->buildUpdate(
+              'glpi_plugin_news_alerts_targets',
+              ['items_id' => '0', 'all_items' => '1'],
+              ['items_id' => '-1']
+          )
+      );
+   }
+
    // install default display preferences
    $dpreferences = new DisplayPreference;
    $found_dpref = $dpreferences->find(['itemtype' => ['LIKE', '%PluginNews%']]);
@@ -157,7 +181,7 @@ function plugin_news_install() {
       $migration->addField("glpi_plugin_news_alerts", "is_displayed_oncentral", 'bool', ['value' => true]);
    }
 
-   $migration->migrationOneTable("glpi_plugin_news_alerts");
+   $migration->executeMigration();
    return true;
 }
 

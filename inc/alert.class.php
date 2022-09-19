@@ -1,25 +1,32 @@
 <?php
-/*
+
+/**
+ * -------------------------------------------------------------------------
+ * News plugin for GLPI
+ * -------------------------------------------------------------------------
  *
- -------------------------------------------------------------------------
- Plugin GLPI News
- Copyright (C) 2015 by teclib.
- http://www.teclib.com
- -------------------------------------------------------------------------
- LICENSE
- This file is part of Plugin GLPI News.
- Plugin GLPI News is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- Plugin GLPI News is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- You should have received a copy of the GNU General Public License
- along with Plugin GLPI News. If not, see <http://www.gnu.org/licenses/>.
- --------------------------------------------------------------------------
-*/
+ * LICENSE
+ *
+ * This file is part of News.
+ *
+ * News is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * News is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with News. If not, see <http://www.gnu.org/licenses/>.
+ * -------------------------------------------------------------------------
+ * @copyright Copyright (C) 2015-2022 by News plugin team.
+ * @license   GPLv2 https://www.gnu.org/licenses/gpl-2.0.html
+ * @link      https://github.com/pluginsGLPI/news
+ * -------------------------------------------------------------------------
+ */
 
 if (!defined('GLPI_ROOT')) {
    die("Sorry. You can't access directly to this file");
@@ -116,7 +123,7 @@ class PluginNewsAlert extends CommonDBTM {
          'datatype'         => 'specific',
          'forcegroupby'     => true,
          'joinparams'       => ['jointype' => 'child'],
-         'additionalfields' => ['itemtype'],
+         'additionalfields' => ['itemtype', 'all_items'],
       ];
 
       $tab[] = [
@@ -221,7 +228,7 @@ class PluginNewsAlert extends CommonDBTM {
                            `$ttable`.`itemtype` = 'Profile'
                            AND (
                               `$ttable`.`items_id` = ".$_SESSION['glpiactiveprofile']['id']."
-                              OR `$ttable`.`items_id` = -1
+                              OR `$ttable`.`all_items` = 1
                            )
                            OR `$ttable`.`itemtype` = 'Group'
                               AND `$ttable`.`items_id` IN ($fndgroup)
@@ -329,10 +336,15 @@ class PluginNewsAlert extends CommonDBTM {
    }
 
    function post_addItem() {
-      $target = new PluginNewsAlert_Target;
-      $target->add(['plugin_news_alerts_id' => $this->getID(),
-                    'itemtype'              => 'Profile',
-                    'items_id'              => -1]);
+      $target = new PluginNewsAlert_Target();
+      $target->add(
+         [
+            'plugin_news_alerts_id' => $this->getID(),
+            'itemtype'              => 'Profile',
+            'items_id'              => 0,
+            'all_items'             => 1,
+         ]
+      );
    }
 
    function getEmpty() {
@@ -353,7 +365,7 @@ class PluginNewsAlert extends CommonDBTM {
 
       echo "<tr  class='tab_bg_1'>";
       echo '<td style="width: 150px">' . __('Name') .'</td>';
-      echo '<td colspan="3"><input name="name" type="text" value="'.Html::cleanInputText($this->getField('name')).'" style="width: 565px" /></td>';
+      echo '<td colspan="3"><input name="name" class="form-control" type="text" value="'.Html::cleanInputText($this->getField('name')).'" style="width: 565px" /></td>';
       echo '</tr>';
 
       echo "<tr class='tab_bg_1'><td>".__('Active')."</td><td colspan='3'>";
@@ -363,8 +375,8 @@ class PluginNewsAlert extends CommonDBTM {
       echo '<tr>';
       echo '<td>' . __('Description') .'</td>';
       echo '<td colspan="3">';
-      echo '<textarea name="message" rows="12" cols="80">'.$this->getField('message').'</textarea>';
-      Html::initEditorSystem('message');
+      echo '<textarea id="plugin_news_message_field" name="message" rows="12" cols="80" class="form-control">'.$this->getField('message').'</textarea>';
+      Html::initEditorSystem('plugin_news_message_field');
       echo '</td>';
       echo '</tr>';
 
@@ -430,9 +442,9 @@ class PluginNewsAlert extends CommonDBTM {
    }
 
    static function displayOnCentral() {
-      echo "<tr><th colspan='2'>";
+      echo "<tr><td colspan='2'>";
       self::displayAlerts(['show_only_central_alerts' => true]);
-      echo "</th></tr>";
+      echo "</td></tr>";
    }
 
    static function displayOnLogin() {
@@ -443,8 +455,6 @@ class PluginNewsAlert extends CommonDBTM {
    }
 
    static function displayAlerts($params = []) {
-      global $CFG_GLPI;
-
       $p['show_only_login_alerts']     = false;
       $p['show_only_central_alerts']      = false;
       $p['show_hidden_alerts']         = false;
@@ -465,20 +475,59 @@ class PluginNewsAlert extends CommonDBTM {
                $date_end = " - $date_end";
             }
             $content    = Html::entity_decode_deep($alert['message']);
-            echo "<div class='plugin_news_alert' data-id='".$alert['id']."'>";
+
+            $close_class = "";
+            $close_tag = "";
             if ($alert['is_close_allowed'] && !$p['show_hidden_alerts']) {
-               echo "<a class='plugin_news_alert-close'></a>";
+                $close_class = "alert-dismissible";
+                $close_tag = "<a class='btn-close' data-bs-dismiss='alert' aria-label='close'></a>";
             }
+
+            $toggle_tag = "";
             if ($p['show_only_login_alerts']) {
-               echo "<a class='plugin_news_alert-toggle'></a>";
+                $toggle_tag = "<a class='plugin_news_alert-toggle'></a>";
             }
-            echo "<div class='plugin_news_alert-title ui-widget-header'>";
-            echo "<span class='plugin_news_alert-icon type_$type'></span>";
-            echo "<div class='plugin_news_alert-title-content'>$title</div>";
-            echo "<div class='plugin_news_alert-date'>$date_start$date_end</div>";
-            echo "</div>";
-            echo "<div class='plugin_news_alert-content ui-widget-content'>$content</div>";
-            echo "</div>";
+
+            $alert_type = "";
+            $alert_icon = "";
+            switch ($type) {
+                case self::GENERAL:
+                    $alert_icon = "ti ti-settings fa-2x me-2";
+                    break;
+                case self::INFO:
+                    $alert_type = "alert-info";
+                    $alert_icon = "ti ti-alert-circle fa-2x me-2";
+                    break;
+                case self::WARNING:
+                    $alert_type = "alert-warning alert-important";
+                    $alert_icon = "ti ti-alert-triangle fa-2x me-2";
+                    break;
+                case self::PROBLEM:
+                    $alert_type = "alert-danger alert-important";
+                    $alert_icon = "ti ti-alert-octagon fa-2x me-2";
+                    break;
+            }
+
+            echo "<div class='plugin_news_alert' data-id='{$alert['id']}'>
+                <div class='alert text-start $alert_type $close_class'>
+                    <div class='d-flex'>
+                        <i class='$alert_icon'></i>
+                        <div>
+                            <h3>
+                                $title
+                                $toggle_tag
+                            </h3>
+                            <div class='text-muted'>
+                                $date_start$date_end
+                            </div>
+                            <div class='mt-2 plugin_news_alert-content'>
+                                $content
+                            </div>
+                        </div>
+                    </div>
+                    $close_tag
+                </div>
+            </div>";
          }
       }
 
@@ -530,7 +579,6 @@ class PluginNewsAlert extends CommonDBTM {
                               'show_hidden_alerts'          => false,
                               'entities_id'                 => $entities_id
                              ]);
-         echo "</br>";
       }
    }
 
