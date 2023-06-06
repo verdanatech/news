@@ -28,7 +28,7 @@
  * -------------------------------------------------------------------------
  */
 
-define ('PLUGIN_NEWS_VERSION', '1.10.6');
+define ('PLUGIN_NEWS_VERSION', '1.12.0');
 
 // Minimal GLPI version, inclusive
 define("PLUGIN_NEWS_MIN_GLPI", "10.0.0");
@@ -57,7 +57,7 @@ function plugin_init_news() {
 
       $PLUGIN_HOOKS['pre_item_form']['news'] = ['PluginNewsAlert', 'preItemForm'];
 
-      if (Session::haveRight('reminder_public', READ)) {
+      if (Session::haveRight(PluginNewsAlert::$rightname, READ)) {
          $PLUGIN_HOOKS['menu_toadd']['news'] = [
             'tools' => 'PluginNewsAlert',
          ];
