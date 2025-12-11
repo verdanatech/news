@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.13.0] - 2025-09-22
+
+### Added
+
+- GLPI 11 compatibility
+
+## [1.12.5] - 2025-09-19
+
+### Fixed
+
+- Fixed dynamic display of alert size.
+- Fixed the size of the alert on the login page (`max-height` and `min-width`)
+
 ## [1.12.4] - 2024-11-08
 
 - Update translations

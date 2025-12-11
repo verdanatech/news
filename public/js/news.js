@@ -1,5 +1,3 @@
-<?php
-
 /**
  * -------------------------------------------------------------------------
  * News plugin for GLPI
@@ -28,21 +26,28 @@
  * -------------------------------------------------------------------------
  */
 
-Session::checkLoginUser();
+pluginNewsCloseAlerts = function() {
+    $(document).on("mousedown", ".plugin_news_alert .alert a[data-bs-dismiss=alert]", function(event) {
+        var alert = $(this).closest(".plugin_news_alert");
+        var id    = alert.attr('data-id');
+        var a_url = CFG_GLPI.root_doc+"/plugins/news/ajax";
+        $.post(a_url+"/hide_alert.php", {'id' : id});
+    });
+};
 
-if ($_SESSION['glpiactiveprofile']['interface'] != 'central') {
-    Html::helpHeader(__s('Alerts', 'news'), $_SERVER['PHP_SELF'], $_SESSION['glpiname']);
-} else {
-    Html::header(
-        __s('Alerts', 'news'),
-        $_SERVER['PHP_SELF'],
-        'tools',
-        'PluginNewsAlert',
-    );
+pluginNewsToggleAlerts = function() {
+    $(document).on("click", ".plugin_news_alert-toggle",function() {
+        var alert = $(this).closest(".plugin_news_alert");
+        alert.toggleClass('expanded');
+    });
 }
 
-PluginNewsAlert::displayAlerts(['show_only_login_alerts' => false,
-    'show_hidden_alerts'                                 => true,
-]);
+$(function() {
+    pluginNewsCloseAlerts();
+    pluginNewsToggleAlerts();
 
-Html::footer();
+    $(document).on('glpi.tab.loaded', function() {
+        pluginNewsCloseAlerts();
+        pluginNewsToggleAlerts();
+    });
+});
