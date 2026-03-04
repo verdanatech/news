@@ -3,10 +3,11 @@
         "php": ">=7.4"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.64",
-        "glpi-project/tools": "^0.7.4",
+        "friendsofphp/php-cs-fixer": "^3.86",
+        "friendsoftwig/twigcs": "^6.1",
+        "glpi-project/tools": "^0.8.0",
         "php-parallel-lint/php-parallel-lint": "^1.4",
-        "phpstan/phpstan": "^1.12"
+        "phpstan/phpstan": "^2.1"
     },
     "config": {
         "optimize-autoloader": true,
@@ -14,5 +15,10 @@
             "php": "7.4.0"
         },
         "sort-packages": true
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Glpi\\Tools\\": "../../tools/src/"
+        }
     }
 }
