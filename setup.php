@@ -30,7 +30,7 @@
 
 use function Safe\define;
 
-define('PLUGIN_NEWS_VERSION', '1.13.0');
+define('PLUGIN_NEWS_VERSION', '1.14.0');
 
 // Minimal GLPI version, inclusive
 define('PLUGIN_NEWS_MIN_GLPI', '11.0.0');
@@ -61,6 +61,9 @@ function plugin_init_news()
         ];
         $PLUGIN_HOOKS['display_central']['news'] = [
             'PluginNewsAlert', 'displayOnCentral',
+        ];
+        $PLUGIN_HOOKS['display_service_catalog']['news'] = [
+            'PluginNewsAlert', 'displayOnServiceCatalog',
         ];
         $PLUGIN_HOOKS['pre_item_list']['news'] = ['PluginNewsAlert', 'preItemList'];
 

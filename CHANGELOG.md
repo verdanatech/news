@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+## [1.14.0] - 2026-04-30
+
+### Added
+
+- Added support for displaying alerts on the service catalog page.
+
+### Fixed
+
+- Fix alert overflow on large login screens.
+
 ## [1.13.0] - 2025-09-22
 
 ### Added
