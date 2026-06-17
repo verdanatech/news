@@ -5,7 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [unreleased]
+## [1.14.1] - 2026-06-10
+
+### Fixed
+
+- Force closed alerts display after alert update.
+- Clean display preferences and profile rights table on uninstall
+
+## [1.14.0] - 2026-04-30
+
+### Added
+
+- Added support for displaying alerts on the service catalog page.
+
+### Fixed
+
+- Fix alert overflow on large login screens.
+
+## [1.13.0] - 2025-09-22
+
+### Added
+
+- GLPI 11 compatibility
 
 ## [1.12.5] - 2025-09-19
 

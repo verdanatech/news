@@ -28,12 +28,14 @@
  * -------------------------------------------------------------------------
  */
 
-define('PLUGIN_NEWS_VERSION', '1.12.5');
+use function Safe\define;
+
+define('PLUGIN_NEWS_VERSION', '1.14.1');
 
 // Minimal GLPI version, inclusive
-define('PLUGIN_NEWS_MIN_GLPI', '10.0.0');
+define('PLUGIN_NEWS_MIN_GLPI', '11.0.0');
 // Maximum GLPI version, exclusive
-define('PLUGIN_NEWS_MAX_GLPI', '10.0.99');
+define('PLUGIN_NEWS_MAX_GLPI', '11.0.99');
 
 function plugin_init_news()
 {
@@ -60,6 +62,9 @@ function plugin_init_news()
         $PLUGIN_HOOKS['display_central']['news'] = [
             'PluginNewsAlert', 'displayOnCentral',
         ];
+        $PLUGIN_HOOKS['display_service_catalog']['news'] = [
+            'PluginNewsAlert', 'displayOnServiceCatalog',
+        ];
         $PLUGIN_HOOKS['pre_item_list']['news'] = ['PluginNewsAlert', 'preItemList'];
 
         $PLUGIN_HOOKS['pre_item_form']['news'] = ['PluginNewsAlert', 'preItemForm'];
@@ -79,7 +84,7 @@ function plugin_init_news()
 function plugin_version_news()
 {
     return [
-        'name'         => __('Alerts', 'news'),
+        'name'         => __s('Alerts', 'news'),
         'version'      => PLUGIN_NEWS_VERSION,
         'author'       => "<a href='mailto:contact@teclib.com'>TECLIB'</a>",
         'license'      => 'GPLv2+',
